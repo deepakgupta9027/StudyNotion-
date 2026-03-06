@@ -60,3 +60,40 @@ exports.showAllCategories = async(req,res)=>{
 }
 
 //categoryPageDetails
+exports.categoryPageDetails = async(req,res)=>{
+    try{
+        //get id
+        const {categoryId} = req.body;
+        //get courses for specified categoryId
+        const selectedCategory = await Category.findById(categoryId)
+        .populate('courses').exec();
+
+        if(!selectedCategory){
+            return res.status(404).json({
+                success:false,
+                message:"Category not found"
+            })
+        }
+        //get courses for different categories
+        const differentCategories = await Category.find({_id:{$ne:categoryId}})
+        .populate('courses').exec();
+        //return response
+        return res.status(200).json({
+            success:true,
+            message:"Category page details fetched successfully",
+            data:{
+                selectedCategory,
+                differentCategories
+            },
+        })
+
+    }
+    catch(e){
+        console.log(e);
+        return res.status(500).json({
+            success:false,
+            message:e.message
+        })
+    }
+
+}
